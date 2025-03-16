@@ -1,182 +1,188 @@
-const canvas = document.getElementById("tetris");
-const context = canvas.getContext("2d");
-const scoreElement = document.getElementById("score");
-const highScoreElement = document.getElementById("high-score");
-const startButton = document.getElementById("startButton");
+// Obtener el canvas y su contexto
+const canvas = document.getElementById('tetrisCanvas');
+const ctx = canvas.getContext('2d');
 
-const COLS = 10;
-const ROWS = 20;
-const BLOCK_SIZE = 30;
-let board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+// Tamaño de cada bloque
+const blockSize = 30;
+const rows = canvas.height / blockSize;
+const columns = canvas.width / blockSize;
+
+// Estado del juego
+let board = [];
+let currentPiece;
+let currentPiecePosition;
+let gameInterval;
 let score = 0;
-let highScore = localStorage.getItem('highScore') || 0;
-let dropSpeed = 500; // Tiempo inicial para la caída
-let dropInterval;
-let gameStarted = false;
+let speed = 500;
 
-highScoreElement.textContent = highScore;
-
-const tetrominos = [
-    [[1, 1, 1], [0, 1, 0]], // T
-    [[1, 1], [1, 1]],       // O
-    [[0, 1, 1], [1, 1, 0]], // S
-    [[1, 1, 0], [0, 1, 1]], // Z
-    [[1, 1, 1, 1]],         // I
-    [[1, 1, 0], [1, 1, 0]], // L
-    [[0, 1, 0], [1, 1, 1]]  // J
+// Formas de las piezas
+const pieces = [
+    [[1, 1, 1], [0, 1, 0]],  // T
+    [[1, 1], [1, 1]],        // O
+    [[1, 1, 0], [0, 1, 1]],  // S
+    [[0, 1, 1], [1, 1, 0]],  // Z
+    [[1, 1, 1, 1]],          // I
+    [[1, 1, 1], [1, 0, 0]],  // L
+    [[1, 1, 1], [0, 0, 1]]   // J
 ];
 
-let currentTetromino = getRandomTetromino();
-let currentPos = { x: 4, y: 0 };
+// Crear un tablero vacío
+function createEmptyBoard() {
+    return Array.from({ length: rows }, () => Array(columns).fill(0));
+}
 
-function drawBoard() {
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    for (let y = 0; y < ROWS; y++) {
-        for (let x = 0; x < COLS; x++) {
-            if (board[y][x] !== 0) {
-                context.fillStyle = 'lime';
-                context.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                context.strokeStyle = '#222';
-                context.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-            }
+// Generar una nueva pieza aleatoria
+function generateNewPiece() {
+    const randomPiece = pieces[Math.floor(Math.random() * pieces.length)];
+    return {
+        shape: randomPiece,
+        color: getRandomColor()
+    };
+}
+
+// Función para obtener un color aleatorio
+function getRandomColor() {
+    const colors = ['cyan', 'yellow', 'green', 'red', 'blue', 'orange', 'purple'];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+// Iniciar el juego
+function startGame() {
+    score = 0;
+    speed = 500;
+    board = createEmptyBoard();
+    currentPiece = generateNewPiece();
+    currentPiecePosition = { x: Math.floor(columns / 2) - 1, y: 0 };
+    gameInterval = setInterval(updateGame, speed);
+    document.getElementById('startButton').disabled = true;
+}
+
+// Actualizar el estado del juego
+function updateGame() {
+    currentPiecePosition.y++;
+
+    if (checkCollision(currentPiece, currentPiecePosition)) {
+        placePieceOnBoard(currentPiece, currentPiecePosition);
+        currentPiece = generateNewPiece();
+        currentPiecePosition = { x: Math.floor(columns / 2) - 1, y: 0 };
+
+        if (checkGameOver()) {
+            clearInterval(gameInterval);
+            alert('Game Over! Puntuación final: ' + score);
         }
     }
+
+    drawBoard();
 }
 
-function drawTetromino() {
-    const shape = currentTetromino[currentPos.y % currentTetromino.length];
-    for (let y = 0; y < shape.length; y++) {
-        for (let x = 0; x < shape[y].length; x++) {
-            if (shape[y][x]) {
-                context.fillStyle = 'red';
-                context.fillRect((currentPos.x + x) * BLOCK_SIZE, (currentPos.y + y) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                context.strokeStyle = '#222';
-                context.strokeRect((currentPos.x + x) * BLOCK_SIZE, (currentPos.y + y) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-            }
-        }
-    }
-}
+// Verificar colisión con las paredes o piezas en el tablero
+function checkCollision(piece, position) {
+    for (let y = 0; y < piece.shape.length; y++) {
+        for (let x = 0; x < piece.shape[y].length; x++) {
+            if (piece.shape[y][x]) {
+                const newX = position.x + x;
+                const newY = position.y + y;
 
-function getRandomTetromino() {
-    return tetrominos[Math.floor(Math.random() * tetrominos.length)];
-}
-
-function collision() {
-    const shape = currentTetromino[currentPos.y % currentTetromino.length];
-    for (let y = 0; y < shape.length; y++) {
-        for (let x = 0; x < shape[y].length; x++) {
-            if (shape[y][x] && (board[currentPos.y + y] && board[currentPos.y + y][currentPos.x + x]) !== 0) {
-                return true;
+                if (newX < 0 || newX >= columns || newY >= rows || board[newY][newX]) {
+                    return true;
+                }
             }
         }
     }
     return false;
 }
 
-function rotate() {
-    currentTetromino = currentTetromino[0].map((_, index) =>
-        currentTetromino.map(row => row[index])
-    );
-    if (collision()) {
-        currentTetromino = currentTetromino[0].map((_, index) =>
-            currentTetromino.map(row => row[row.length - 1 - index])
-        );
+// Colocar la pieza en el tablero
+function placePieceOnBoard(piece, position) {
+    for (let y = 0; y < piece.shape.length; y++) {
+        for (let x = 0; x < piece.shape[y].length; x++) {
+            if (piece.shape[y][x]) {
+                board[position.y + y][position.x + x] = piece.color;
+            }
+        }
+    }
+    score += 200;
+    removeFullRows();
+}
+
+// Eliminar las filas completas
+function removeFullRows() {
+    for (let y = rows - 1; y >= 0; y--) {
+        if (board[y].every(cell => cell !== 0)) {
+            board.splice(y, 1);
+            board.unshift(Array(columns).fill(0));
+        }
     }
 }
 
-function moveDown() {
-    currentPos.y++;
-    if (collision()) {
-        currentPos.y--;
-        placeTetromino();
-        reset();
-        checkRows();
+// Dibujar el tablero y las piezas
+function drawBoard() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < columns; x++) {
+            if (board[y][x]) {
+                ctx.fillStyle = board[y][x];
+                ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+            }
+        }
     }
+
+    drawPiece(currentPiece, currentPiecePosition);
 }
 
-function moveLeft() {
-    currentPos.x--;
-    if (collision()) currentPos.x++;
-}
-
-function moveRight() {
-    currentPos.x++;
-    if (collision()) currentPos.x--;
-}
-
-function placeTetromino() {
-    const shape = currentTetromino[currentPos.y % currentTetromino.length];
-    for (let y = 0; y < shape.length; y++) {
-        for (let x = 0; x < shape[y].length; x++) {
-            if (shape[y][x]) {
-                board[currentPos.y + y][currentPos.x + x] = 1;
+function drawPiece(piece, position) {
+    for (let y = 0; y < piece.shape.length; y++) {
+        for (let x = 0; x < piece.shape[y].length; x++) {
+            if (piece.shape[y][x]) {
+                ctx.fillStyle = piece.color;
+                ctx.fillRect((position.x + x) * blockSize, (position.y + y) * blockSize, blockSize, blockSize);
             }
         }
     }
 }
 
-function checkRows() {
-    let linesCleared = 0;
-    for (let row = ROWS - 1; row >= 0; row--) {
-        if (board[row].every(cell => cell !== 0)) {
-            board.splice(row, 1);
-            board.unshift(Array(COLS).fill(0));
-            linesCleared++;
-        }
-    }
-    if (linesCleared > 0) {
-        score += 200 * linesCleared;
-        scoreElement.textContent = score;
-        if (score > highScore) {
-            highScore = score;
-            localStorage.setItem('highScore', highScore);
-            highScoreElement.textContent = highScore;
-        }
-        increaseSpeed();
+// Verificar si el juego está terminado
+function checkGameOver() {
+    return currentPiecePosition.y === 0 && checkCollision(currentPiece, currentPiecePosition);
+}
+
+// Mover la pieza a la izquierda
+function moveLeft() {
+    currentPiecePosition.x--;
+    if (checkCollision(currentPiece, currentPiecePosition)) {
+        currentPiecePosition.x++;
     }
 }
 
-function increaseSpeed() {
-    if (score >= 200 && score % 200 === 0) {
-        dropSpeed = Math.max(100, dropSpeed - 50); // Aumentar la velocidad pero sin hacerla demasiado rápida
-        clearInterval(dropInterval);
-        dropInterval = setInterval(moveDown, dropSpeed);
+// Mover la pieza a la derecha
+function moveRight() {
+    currentPiecePosition.x++;
+    if (checkCollision(currentPiece, currentPiecePosition)) {
+        currentPiecePosition.x--;
     }
 }
 
-function reset() {
-    currentTetromino = getRandomTetromino();
-    currentPos = { x: 4, y: 0 };
-    if (collision()) {
-        gameOver();
+// Rotar la pieza
+function rotatePiece() {
+    const rotatedShape = currentPiece.shape[0].map((_, index) =>
+        currentPiece.shape.map(row => row[index])
+    ).reverse();
+
+    const rotatedPiece = {
+        shape: rotatedShape,
+        color: currentPiece.color
+    };
+
+    const originalPiece = currentPiece;
+    currentPiece = rotatedPiece;
+
+    if (checkCollision(currentPiece, currentPiecePosition)) {
+        currentPiece = originalPiece;
     }
 }
 
-function gameOver() {
-    alert("Game Over! Puntaje final: " + score);
-    board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
-    score = 0;
-    scoreElement.textContent = score;
-    reset();
-}
-
-// Lógica de botones
-document.getElementById('moveLeft').addEventListener('click', moveLeft);
-document.getElementById('moveRight').addEventListener('click', moveRight);
-document.getElementById('rotate').addEventListener('click', rotate);
-document.getElementById('moveDown').addEventListener('click', moveDown);
-
-// Función de inicio
-startButton.addEventListener('click', function() {
-    if (!gameStarted) {
-        gameStarted = true;
-        startButton.style.display = 'none'; // Ocultar el botón "Iniciar"
-        dropInterval = setInterval(gameLoop, dropSpeed); // Comienza el ciclo del juego
-    }
-});
-
-function gameLoop() {
-    drawBoard();
-    drawTetromino();
-    moveDown();
-}
+// Agregar eventos a los botones
+document.getElementById('startButton').addEventListener('click', startGame);
+document.getElementById('left').addEventListener('click', moveLeft);
+document.getElementById('right').addEventListener('click', moveRight);
+document.getElementById('rotate').addEventListener('click', rotatePiece);
