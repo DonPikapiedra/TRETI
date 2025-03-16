@@ -1,86 +1,50 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 body {
     font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: #1e1e1e;
+    text-align: center;
+    background-color: #282c34;
     color: white;
+    margin: 0;
+    padding: 0;
 }
 
 h1 {
-    font-size: 30px;
-    margin-bottom: 20px;
-}
-
-canvas {
-    border: 2px solid #ffffff;
-    margin-bottom: 20px;
-}
-
-#score, #high-score {
-    font-size: 20px;
-    margin-top: 10px;
-}
-
-#controls {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
     margin-top: 20px;
-}
-
-button {
-    background-color: #444;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 15px;
-    font-size: 24px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-button:hover {
-    background-color: #555;
 }
 
 #startButton {
-    display: block;
-    background-color: #008cba;
+    background-color: #4CAF50;
     color: white;
-    font-size: 20px;
-    padding: 15px 25px;
+    padding: 15px 32px;
+    font-size: 16px;
+    margin: 20px 0;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+}
+
+#tetrisCanvas {
+    border: 1px solid #fff;
+    background-color: #000;
+    margin: 0 auto;
+    display: block;
+}
+
+.controls {
+    margin-top: 10px;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    font-size: 24px;
+    width: 50px;
+    height: 50px;
+    margin: 10px;
+    border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-top: 20px;
 }
 
-#startButton:hover {
-    background-color: #007b8f;
-}
-
-@media (max-width: 600px) {
-    canvas {
-        width: 90%;
-        height: auto;
-    }
-
-    button {
-        font-size: 28px; /* Aumentar el tamaño de los botones para móviles */
-        padding: 12px;
-    }
-
-    #startButton {
-        font-size: 18px;
-        padding: 12px 20px;
-    }
+button:active {
+    background-color: #3e8e41;
 }
