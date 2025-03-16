@@ -66,7 +66,7 @@ function updateGame() {
     if (checkCollision(currentPiece, currentPiecePosition)) {
         // Colocar la pieza en el tablero
         placePieceOnBoard(currentPiece, currentPiecePosition);
-        
+
         // Eliminar filas completas
         removeFullRows();
 
