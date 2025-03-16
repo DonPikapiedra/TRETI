@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TETRIS</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+        #controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        button {
+            margin: 0 5px;
+            padding: 15px;
+            font-size: 30px; /* Aumento el tamaño de los emojis */
+            cursor: pointer;
+        }
+        #startButton {
+            display: block;
+            margin: 20px auto;
+            font-size: 18px;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>TETRIS</h1>
+    <canvas id="tetris" width="300" height="600"></canvas>
+    <div id="score">Puntaje: 0</div>
+    <div id="high-score">Puntaje más alto: 0</div>
+    
+    <div id="controls">
+        <button id="moveLeft">⬅️</button>
+        <button id="rotate">🔄</button>
+        <button id="moveRight">➡️</button>
+        <button id="moveDown">⬇️</button>
+    </div>
+
+    <button id="startButton">Iniciar Juego</button>
+
+    <script src="script.js"></script>
+</body>
+</html>
