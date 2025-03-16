@@ -59,19 +59,29 @@ function startGame() {
 
 // Actualizar el estado del juego
 function updateGame() {
+    // Mover la pieza hacia abajo
     currentPiecePosition.y++;
 
+    // Comprobar si la pieza ha colisionado
     if (checkCollision(currentPiece, currentPiecePosition)) {
+        // Colocar la pieza en el tablero
         placePieceOnBoard(currentPiece, currentPiecePosition);
+        
+        // Eliminar filas completas
+        removeFullRows();
+
+        // Generar una nueva pieza
         currentPiece = generateNewPiece();
         currentPiecePosition = { x: Math.floor(columns / 2) - 1, y: 0 };
 
+        // Comprobar si el juego ha terminado
         if (checkGameOver()) {
             clearInterval(gameInterval);
             alert('Game Over! Puntuación final: ' + score);
         }
     }
 
+    // Redibujar el tablero
     drawBoard();
 }
 
@@ -101,8 +111,7 @@ function placePieceOnBoard(piece, position) {
             }
         }
     }
-    score += 200;
-    removeFullRows();
+    score += 200; // Aumentar puntaje por fila eliminada
 }
 
 // Eliminar las filas completas
