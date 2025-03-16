@@ -78,6 +78,7 @@ function updateGame() {
         if (checkGameOver()) {
             clearInterval(gameInterval);
             alert('Game Over! Puntuación final: ' + score);
+            document.getElementById('startButton').disabled = false;
         }
     }
 
