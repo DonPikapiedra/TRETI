@@ -1,47 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TETRIS</title>
-    <style>
-        canvas {
-            border: 1px solid black;
-        }
-        #controls {
-            display: flex;
-            justify-content: center;
-            margin-top: 10px;
-        }
-        button {
-            margin: 0 5px;
-            padding: 15px;
-            font-size: 30px; /* Aumento el tamaño de los emojis */
-            cursor: pointer;
-        }
-        #startButton {
-            display: block;
-            margin: 20px auto;
-            font-size: 18px;
-            padding: 10px 20px;
-        }
-    </style>
+    <title>Treti - Tetris</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>TETRIS</h1>
-    <canvas id="tetris" width="300" height="600"></canvas>
-    <div id="score">Puntaje: 0</div>
-    <div id="high-score">Puntaje más alto: 0</div>
-    
-    <div id="controls">
-        <button id="moveLeft">⬅️</button>
-        <button id="rotate">🔄</button>
-        <button id="moveRight">➡️</button>
-        <button id="moveDown">⬇️</button>
-    </div>
-
+    <h1>Treti - Tetris</h1>
     <button id="startButton">Iniciar Juego</button>
-
+    <div class="controls">
+        <button id="left">⬅️</button>
+        <button id="rotate">🔄</button>
+        <button id="right">➡️</button>
+    </div>
+    <canvas id="tetrisCanvas" width="300" height="600"></canvas>
     <script src="script.js"></script>
 </body>
 </html>
